@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -119,6 +120,15 @@ func addBlog(c echo.Context) error {
 
 	println("Title : " + title)
 	println("Content : " + content)
+
+	var newBlog = Blog{
+		Title:    title,
+		Content:  content,
+		Author:   "Surya Elidanto",
+		PostDate: time.Now().String(),
+	}
+
+	dataBlog = append(dataBlog, newBlog)
 
 	return c.Redirect(http.StatusMovedPermanently, "/blog")
 }
