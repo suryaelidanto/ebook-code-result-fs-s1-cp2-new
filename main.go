@@ -17,6 +17,28 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
+type Blog struct {
+	Title    string
+	Content  string
+	Author   string
+	PostDate string
+}
+
+var dataBlog = []Blog{
+	{
+		Title:    "Hallo Title",
+		Content:  "Hallo Content",
+		Author:   "Surya Elidanto",
+		PostDate: "07/02/2023",
+	},
+	{
+		Title:    "Hallo Title 2",
+		Content:  "Hallo Content 2",
+		Author:   "Surya Elidanto",
+		PostDate: "08/02/2023",
+	},
+}
+
 func main() {
 	// Create new Echo instance
 	e := echo.New()
