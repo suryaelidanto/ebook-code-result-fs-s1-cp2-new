@@ -89,10 +89,21 @@ func blog(c echo.Context) error {
 func blogDetail(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
+	var BlogDetail = Blog{}
+
+	for i, data := range dataBlog {
+		if id == i {
+			BlogDetail = Blog{
+				Title:    data.Title,
+				Content:  data.Content,
+				PostDate: data.PostDate,
+				Author:   data.Author,
+			}
+		}
+	}
+
 	data := map[string]interface{}{
-		"Id":      id,
-		"Title":   "Pasar Coding di Indonesia Dinilai Masih Menjanjikan",
-		"Content": "REPUBLIKA.CO.ID, JAKARTA -- Ketimpangan sumber daya manusia (SDM) disektor digital masih menjadi isu yang belum terpecahkan. Berdasarkan penelitian ManpowerGroup.REPUBLIKA.CO.ID, JAKARTA -- Ketimpangan sumber daya manusia (SDM) disektor digital masih menjadi isu yang belum terpecahkan. Berdasarkan pen...",
+		"Blog": BlogDetail,
 	}
 
 	return c.Render(http.StatusOK, "blog-detail.html", data)
