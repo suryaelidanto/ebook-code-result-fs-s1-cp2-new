@@ -60,6 +60,7 @@ func main() {
 	e.GET("/blog", blog)
 	e.GET("/blog-detail/:id", blogDetail)
 	e.GET("/form-blog", formAddBlog)
+	e.POST("/blog-delete/:id", deleteBlog)
 	e.POST("/add-blog", addBlog)
 
 	// Start server
@@ -129,6 +130,14 @@ func addBlog(c echo.Context) error {
 	}
 
 	dataBlog = append(dataBlog, newBlog)
+
+	return c.Redirect(http.StatusMovedPermanently, "/blog")
+}
+
+func deleteBlog(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	dataBlog = append(dataBlog[:id], dataBlog[id+1:]...)
 
 	return c.Redirect(http.StatusMovedPermanently, "/blog")
 }

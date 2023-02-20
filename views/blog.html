@@ -47,9 +47,11 @@
           <img src="/public/images/blog-img.png" alt="" />
         </div>
         <div class="blog-content">
-          <div class="btn-group">
+          <div class="btn-group" style="display:flex;width: 100%; justify-content:flex-end;">
             <a href="#" class="btn-edit">Edit Post</a>
-            <a href="/blog-delete/{{$index}}" class="btn-post">Delete Blog</a>
+            <form action="/blog-delete/{{$index}}" method="POST" style="margin-left:10px">
+              <input type="submit" class="btn-post" value="Delete Blog" style="cursor:pointer">
+            </form>
           </div>
           <h1>
             <a href="/blog-detail/{{$index}}" target="_blank">{{$data.Title}}</a>
