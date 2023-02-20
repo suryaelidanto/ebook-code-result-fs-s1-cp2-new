@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,6 +35,7 @@ func main() {
 	e.GET("/", home)
 	e.GET("/contact", contact)
 	e.GET("/blog", blog)
+	e.GET("/blog-detail/:id", blogDetail)
 
 	// Start server
 	println("Server running on port 5000")
@@ -54,4 +56,16 @@ func contact(c echo.Context) error {
 
 func blog(c echo.Context) error {
 	return c.Render(http.StatusOK, "blog.html", nil)
+}
+
+func blogDetail(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	data := map[string]interface{}{
+		"Id":      id,
+		"Title":   "Pasar Coding di Indonesia Dinilai Masih Menjanjikan",
+		"Content": "REPUBLIKA.CO.ID, JAKARTA -- Ketimpangan sumber daya manusia (SDM) disektor digital masih menjadi isu yang belum terpecahkan. Berdasarkan penelitian ManpowerGroup.REPUBLIKA.CO.ID, JAKARTA -- Ketimpangan sumber daya manusia (SDM) disektor digital masih menjadi isu yang belum terpecahkan. Berdasarkan pen...",
+	}
+
+	return c.Render(http.StatusOK, "blog-detail.html", data)
 }
