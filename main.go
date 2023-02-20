@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"ebook-s1-cp2/connection"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -19,10 +22,12 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 type Blog struct {
+	ID       int
 	Title    string
 	Content  string
+	Image    string
 	Author   string
-	PostDate string
+	PostDate time.Time
 }
 
 var dataBlog = []Blog{
@@ -30,17 +35,20 @@ var dataBlog = []Blog{
 		Title:    "Hallo Title",
 		Content:  "Hallo Content",
 		Author:   "Surya Elidanto",
-		PostDate: "07/02/2023",
+		PostDate: time.Now(),
 	},
 	{
 		Title:    "Hallo Title 2",
 		Content:  "Hallo Content 2",
 		Author:   "Surya Elidanto",
-		PostDate: "08/02/2023",
+		PostDate: time.Now(),
 	},
 }
 
 func main() {
+	// Called database connection function
+	connection.DatabaseConnect()
+
 	// Create new Echo instance
 	e := echo.New()
 
@@ -81,8 +89,25 @@ func contact(c echo.Context) error {
 }
 
 func blog(c echo.Context) error {
+	data, _ := connection.Conn.Query(context.Background(), "SELECT id, title, content, image, post_date FROM tb_blog")
+
+	var result []Blog
+	for data.Next() {
+		var each = Blog{}
+
+		err := data.Scan(&each.ID, &each.Title, &each.Content, &each.Image, &each.PostDate)
+		if err != nil {
+			fmt.Println(err.Error())
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+
+		each.Author = "Surya Elidanto"
+
+		result = append(result, each)
+	}
+
 	blogs := map[string]interface{}{
-		"Blogs": dataBlog,
+		"Blogs": result,
 	}
 
 	return c.Render(http.StatusOK, "blog.html", blogs)
@@ -126,7 +151,7 @@ func addBlog(c echo.Context) error {
 		Title:    title,
 		Content:  content,
 		Author:   "Surya Elidanto",
-		PostDate: time.Now().String(),
+		PostDate: time.Now(),
 	}
 
 	dataBlog = append(dataBlog, newBlog)
