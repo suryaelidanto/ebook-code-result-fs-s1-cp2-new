@@ -52,7 +52,7 @@
             <button class="btn-post">Delete Blog</button>
           </div>
           <h1>
-            <a href="/blog-detail/0" target="_blank">Pasar Coding di Indonesia Dinilai Masih Menjanjikan</a>
+            <a href="/blog-detail/{{$index}}" target="_blank">{{$data.Title}}</a>
           </h1>
           <div class="detail-blog-content">
             {{$data.PostDate}} | {{$data.Author}}
