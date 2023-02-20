@@ -79,7 +79,11 @@ func contact(c echo.Context) error {
 }
 
 func blog(c echo.Context) error {
-	return c.Render(http.StatusOK, "blog.html", nil)
+	blogs := map[string]interface{}{
+		"Blogs": dataBlog,
+	}
+
+	return c.Render(http.StatusOK, "blog.html", blogs)
 }
 
 func blogDetail(c echo.Context) error {
