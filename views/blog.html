@@ -13,7 +13,7 @@
   <nav>
     <div class="left-side">
       <a href="/">
-        <img src="public/images/logo.png" alt="logo" />
+        <img src="/public/images/logo.png" alt="logo" />
       </a>
       <ul>
         <li>
@@ -67,7 +67,7 @@
               <div class="input-blog-image-group">
                 <label for="input-blog-image">
                   <p>Attach File</p>
-                  <img src="public/images/file.png" alt="file" />
+                  <img src="/public/images/file.png" alt="file" />
                 </label>
                 <input type="file" id="input-blog-image" hidden />
               </div>
@@ -88,29 +88,24 @@
 
     <div id="contents" class="blog-list">
       <!-- dynamic content would be here -->
+      {{range $index, $data := .Blogs}}
       <div class="blog-list-item">
         <div class="blog-image">
           <img src="/public/images/blog-img.png" alt="" />
         </div>
         <div class="blog-content">
           <div class="btn-group">
-            <button class="btn-edit">Edit Post</button>
-            <button class="btn-post">Delete Blog</button>
+            <a href="#" class="btn-edit">Edit Post</a>
+            <a href="/blog-delete/{{$index}}" class="btn-post">Delete Blog</a>
           </div>
           <h1>
-            <a href="/blog-detail/0" target="_blank">Pasar Coding di Indonesia Dinilai Masih Menjanjikan</a>
+            <a href="/blog-detail/{{$index}}" target="_blank">{{$data.Title}}</a>
           </h1>
           <div class="detail-blog-content">
-            12 Jul 2021 22:30 WIB | Ichsan Emrald Alamsyah
+            {{$data.PostDate}} | {{$data.Author}}
           </div>
           <p>
-            Ketimpangan sumber daya manusia (SDM) di sektor digital masih
-            menjadi isu yang belum terpecahkan. Berdasarkan penelitian
-            ManpowerGroup, ketimpangan SDM global, termasuk Indonesia,
-            meningkat dua kali lipat dalam satu dekade terakhir. Lorem ipsum,
-            dolor sit amet consectetur adipisicing elit. Quam, molestiae
-            numquam! Deleniti maiores expedita eaque deserunt quaerat! Dicta,
-            eligendi debitis?
+            {{$data.Content}}
           </p>
 
           <div style="float:right; margin: 10px">
@@ -119,10 +114,14 @@
 
         </div>
       </div>
+      {{end}}
+
     </div>
   </div>
 
-  <script src="/public/js/blog.js"></script>
+  <script>
+
+  </script>
 </body>
 
 </html>
