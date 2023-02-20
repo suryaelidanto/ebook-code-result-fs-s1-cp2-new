@@ -26,6 +26,9 @@ func main() {
 
 	e.Renderer = t
 
+	// Serve static files from "/public" directory
+	e.Static("/public", "public")
+
 	// Routing
 	e.GET("/hello", helloWorld)
 	e.GET("/", home)
