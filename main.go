@@ -144,18 +144,13 @@ func formAddBlog(c echo.Context) error {
 func addBlog(c echo.Context) error {
 	title := c.FormValue("inputTitle")
 	content := c.FormValue("inputContent")
+	// author := "SuryaElz"  you can make this with manually input, and add author column in table, challenge yourself :)
 
-	println("Title : " + title)
-	println("Content : " + content)
+	_, err := connection.Conn.Exec(context.Background(), "INSERT INTO tb_blog (title, content, image, post_date) VALUES ($1, $2, $3, $4)", title, content, "blog-img.png", time.Now())
 
-	var newBlog = Blog{
-		Title:    title,
-		Content:  content,
-		Author:   "Surya Elidanto",
-		PostDate: time.Now(),
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-
-	dataBlog = append(dataBlog, newBlog)
 
 	return c.Redirect(http.StatusMovedPermanently, "/blog")
 }
