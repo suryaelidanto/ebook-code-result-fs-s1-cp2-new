@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -71,6 +73,9 @@ func main() {
 
 	e.Renderer = t
 
+	// To use sessions using echo
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("session"))))
+
 	// Routing
 	e.GET("/hello", helloWorld)
 	e.GET("/", home)
@@ -97,7 +102,18 @@ func helloWorld(c echo.Context) error {
 }
 
 func home(c echo.Context) error {
-	return c.Render(http.StatusOK, "index.html", nil)
+	sess, _ := session.Get("session", c)
+
+	flash := map[string]interface{}{
+		"FlashStatus":  sess.Values["status"],
+		"FlashMessage": sess.Values["message"],
+	}
+
+	delete(sess.Values, "message")
+	delete(sess.Values, "status")
+	sess.Save(c.Request(), c.Response())
+
+	return c.Render(http.StatusOK, "index.html", flash)
 }
 
 func contact(c echo.Context) error {
@@ -200,14 +216,25 @@ func register(c echo.Context) error {
 
 	_, err = connection.Conn.Exec(context.Background(), "INSERT INTO tb_user(name, email, password) VALUES ($1, $2, $3)", name, email, passwordHash)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "register error, please try again"})
+		redirectWithMessage(c, "Register failed, please try again.", false, "/form-register")
 	}
 
-	return c.Redirect(http.StatusMovedPermanently, "/form-register")
+	return redirectWithMessage(c, "Register success!", true, "/form-login")
 }
 
 func formLogin(c echo.Context) error {
-	return c.Render(http.StatusOK, "form-login.html", nil)
+	sess, _ := session.Get("session", c)
+
+	flash := map[string]interface{}{
+		"FlashStatus":  sess.Values["status"],
+		"FlashMessage": sess.Values["message"],
+	}
+
+	delete(sess.Values, "message")
+	delete(sess.Values, "status")
+	sess.Save(c.Request(), c.Response())
+
+	return c.Render(http.StatusOK, "form-login.html", flash)
 }
 
 func login(c echo.Context) error {
@@ -221,13 +248,31 @@ func login(c echo.Context) error {
 	user := User{}
 	err = connection.Conn.QueryRow(context.Background(), "SELECT * FROM tb_user WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Email or password is incorrect!"})
+		return redirectWithMessage(c, "Email or password incorrect!", false, "/form-login")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Email or password is incorrect!"})
+		return redirectWithMessage(c, "Email or password incorrect!", false, "/form-login")
 	}
 
+	sess, _ := session.Get("session", c)
+	sess.Options.MaxAge = 10800 // 3 JAM
+	sess.Values["message"] = "Login success!"
+	sess.Values["status"] = true
+	sess.Values["name"] = user.Name
+	sess.Values["email"] = user.Email
+	sess.Values["id"] = user.ID
+	sess.Values["isLogin"] = true
+	sess.Save(c.Request(), c.Response())
+
 	return c.Redirect(http.StatusMovedPermanently, "/")
+}
+
+func redirectWithMessage(c echo.Context, message string, status bool, path string) error {
+	sess, _ := session.Get("session", c)
+	sess.Values["message"] = message
+	sess.Values["status"] = status
+	sess.Save(c.Request(), c.Response())
+	return c.Redirect(http.StatusMovedPermanently, path)
 }
