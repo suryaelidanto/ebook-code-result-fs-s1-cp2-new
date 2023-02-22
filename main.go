@@ -158,7 +158,11 @@ func addBlog(c echo.Context) error {
 func deleteBlog(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	dataBlog = append(dataBlog[:id], dataBlog[id+1:]...)
+	_, err := connection.Conn.Exec(context.Background(), "DELETE FROM tb_blog WHERE id=$1", id)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
 
 	return c.Redirect(http.StatusMovedPermanently, "/blog")
 }
