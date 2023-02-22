@@ -2,7 +2,7 @@
 
 <head>
   <title>Creating Blog Page</title>
-  <link rel="stylesheet" href="public/css/blog.css" />
+  <link rel="stylesheet" href="/public/css/blog.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
     integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -13,7 +13,7 @@
   <nav>
     <div class="left-side">
       <a href="/">
-        <img src="public/images/logo.png" alt="logo" />
+        <img src="/public/images/logo.png" alt="logo" />
       </a>
       <ul>
         <li>
@@ -44,7 +44,7 @@
       {{range $index, $data := .Blogs}}
       <div class="blog-list-item">
         <div class="blog-image">
-          <img src="public/images/{{$data.Image}}" alt="" />
+          <img src="/public/images/{{$data.Image}}" alt="" />
         </div>
         <div class="blog-content">
           <div class="btn-group" style="display:flex;width: 100%; justify-content:flex-end;">
@@ -54,10 +54,10 @@
             </form>
           </div>
           <h1>
-            <a href="/blog-detail/{{$index}}" target="_blank">{{$data.Title}}</a>
+            <a href="/blog-detail/{{$data.ID}}" target="_blank">{{$data.Title}}</a>
           </h1>
           <div class="detail-blog-content">
-            {{$data.PostDate}} | {{$data.Author}}
+            {{$data.FormatDate}} | {{$data.Author}}
           </div>
           <p>
             {{$data.Content}}
@@ -75,6 +75,7 @@
   </div>
 
   <script>
+
   </script>
 </body>
 

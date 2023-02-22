@@ -22,12 +22,13 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 type Blog struct {
-	ID       int
-	Title    string
-	Content  string
-	Image    string
-	Author   string
-	PostDate time.Time
+	ID         int
+	Title      string
+	Content    string
+	Image      string
+	Author     string
+	PostDate   time.Time
+	FormatDate string
 }
 
 var dataBlog = []Blog{
@@ -102,6 +103,7 @@ func blog(c echo.Context) error {
 		}
 
 		each.Author = "Surya Elidanto"
+		each.FormatDate = each.PostDate.Format("2 January 2006")
 
 		result = append(result, each)
 	}
@@ -118,16 +120,15 @@ func blogDetail(c echo.Context) error {
 
 	var BlogDetail = Blog{}
 
-	for i, data := range dataBlog {
-		if id == i {
-			BlogDetail = Blog{
-				Title:    data.Title,
-				Content:  data.Content,
-				PostDate: data.PostDate,
-				Author:   data.Author,
-			}
-		}
+	err := connection.Conn.QueryRow(context.Background(), "SELECT id, title, content, image, post_date FROM tb_blog WHERE id=$1", id).Scan(
+		&BlogDetail.ID, &BlogDetail.Title, &BlogDetail.Content, &BlogDetail.Image, &BlogDetail.PostDate)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
+
+	BlogDetail.Author = "Surya Elidanto"
+	BlogDetail.FormatDate = BlogDetail.PostDate.Format("2 January 2006")
 
 	data := map[string]interface{}{
 		"Blog": BlogDetail,
