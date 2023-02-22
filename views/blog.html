@@ -57,7 +57,7 @@
       {{range $index, $data := .Blogs}}
       <div class="blog-list-item">
         <div class="blog-image">
-          <img src="/public/images/{{$data.Image}}" alt="" />
+          <img src="/uploads/{{$data.Image}}" alt="" />
         </div>
         <div class="blog-content">
           {{if $.DataSession.IsLogin}}

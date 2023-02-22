@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"ebook-s1-cp2/connection"
+	"ebook-s1-cp2/middleware"
 	"fmt"
 	"html/template"
 	"io"
@@ -73,6 +74,8 @@ func main() {
 
 	// Serve static files from "public" directory
 	e.Static("/public", "public")
+	// Serve static files from "uploads" directory
+	e.Static("/uploads", "uploads")
 
 	t := &Template{
 		templates: template.Must(template.ParseGlob("views/*.html")),
@@ -91,7 +94,7 @@ func main() {
 	e.GET("/blog-detail/:id", blogDetail)
 	e.GET("/form-blog", formAddBlog)
 	e.POST("/blog-delete/:id", deleteBlog)
-	e.POST("/add-blog", addBlog)
+	e.POST("/add-blog", middleware.UploadFile(addBlog))
 
 	e.GET("/form-register", formRegister)
 	e.POST("/register", register)
@@ -193,9 +196,13 @@ func formAddBlog(c echo.Context) error {
 func addBlog(c echo.Context) error {
 	title := c.FormValue("inputTitle")
 	content := c.FormValue("inputContent")
-	// author := "SuryaElz"  you can make this with manually input, and add author column in table, challenge yourself :)
+	sess, _ := session.Get("session", c)
 
-	_, err := connection.Conn.Exec(context.Background(), "INSERT INTO tb_blog (title, content, image, post_date) VALUES ($1, $2, $3, $4)", title, content, "blog-img.png", time.Now())
+	authorId := sess.Values["id"].(int)
+
+	image := c.Get("dataFile").(string)
+
+	_, err := connection.Conn.Exec(context.Background(), "INSERT INTO tb_blog (title, content, image, post_date, author_id) VALUES ($1, $2, $3, $4, $5)", title, content, image, time.Now(), authorId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
