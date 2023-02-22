@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Template struct {
@@ -31,20 +33,20 @@ type Blog struct {
 	FormatDate string
 }
 
-var dataBlog = []Blog{
-	{
-		Title:    "Hallo Title",
-		Content:  "Hallo Content",
-		Author:   "Surya Elidanto",
-		PostDate: time.Now(),
-	},
-	{
-		Title:    "Hallo Title 2",
-		Content:  "Hallo Content 2",
-		Author:   "Surya Elidanto",
-		PostDate: time.Now(),
-	},
-}
+// var dataBlog = []Blog{
+// 	{
+// 		Title:    "Hallo Title",
+// 		Content:  "Hallo Content",
+// 		Author:   "Surya Elidanto",
+// 		PostDate: time.Now(),
+// 	},
+// 	{
+// 		Title:    "Hallo Title 2",
+// 		Content:  "Hallo Content 2",
+// 		Author:   "Surya Elidanto",
+// 		PostDate: time.Now(),
+// 	},
+// }
 
 func main() {
 	// Called database connection function
@@ -71,6 +73,9 @@ func main() {
 	e.GET("/form-blog", formAddBlog)
 	e.POST("/blog-delete/:id", deleteBlog)
 	e.POST("/add-blog", addBlog)
+
+	e.GET("/form-register", formRegister)
+	e.POST("/register", register)
 
 	// Start server
 	println("Server running on port 5000")
@@ -165,4 +170,28 @@ func deleteBlog(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusMovedPermanently, "/blog")
+}
+
+func formRegister(c echo.Context) error {
+	return c.Render(http.StatusOK, "form-register.html", nil)
+}
+
+func register(c echo.Context) error {
+	// parseForm is best practice to make sure request body is form data format, not JSON, XML, etc.
+	err := c.Request().ParseForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+	name := c.FormValue("inputName")
+	email := c.FormValue("inputEmail")
+	password := c.FormValue("inputPassword")
+
+	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
+
+	_, err = connection.Conn.Exec(context.Background(), "INSERT INTO tb_user(name, email, password) VALUES ($1, $2, $3)", name, email, passwordHash)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "register error, please try again"})
+	}
+
+	return c.Redirect(http.StatusMovedPermanently, "/register")
 }
