@@ -61,9 +61,11 @@
         </div>
         <div class="blog-content">
           {{if $.DataSession.IsLogin}}
-          <div class="btn-group">
+          <div class="btn-group" style="display:flex;width: 100%; justify-content:flex-end;">
             <a href="#" class="btn-edit">Edit Post</a>
-            <a href="/blog-delete/{{$data.ID}}" class="btn-post">Delete Blog</a>
+            <form action="/blog-delete/{{$data.ID}}" method="POST" style="margin-left:10px">
+              <input type="submit" class="btn-post" value="Delete Blog" style="cursor:pointer">
+            </form>
           </div>
           {{end}}
           <h1>
