@@ -2,7 +2,7 @@
 
 <head>
   <title>Creating Blog Page</title>
-  <link rel="stylesheet" href="/public/css/blog.css" />
+  <link rel="stylesheet" href="public/css/blog.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
     integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -13,7 +13,7 @@
   <nav>
     <div class="left-side">
       <a href="/">
-        <img src="/public/images/logo.png" alt="logo" />
+        <img src="public/images/logo.png" alt="logo" />
       </a>
       <ul>
         <li>
@@ -24,20 +24,33 @@
         </li>
       </ul>
     </div>
+
+
     <div class="right-side">
-      <a href="/contact"> Contact Me </a>
+
+      {{if .DataSession.IsLogin}}
+      <a href="#">Hallo, {{.DataSession.Name}}</a>
+      <form id="myform" action="/logout" method="POST">
+      </form>
+      <button onclick="document.getElementById('myform').submit()" class="btn-auth">Logout</button>
+      {{else}}
+      <a href="/form-register" class="btn-auth">Register</a>
+      <a href="/form-login" class="btn-auth">Login</a>
+      {{end}}
+
+      <a href="/contact" class="btn-contact"> Contact Me </a>
     </div>
   </nav>
 
   <!-- Blog -->
   <!-- Form -->
   <div class="blog">
-    <!-- <hr class="line" /> -->
+    {{if .DataSession.IsLogin}}
     <div style="margin-top: 50px; text-align:end; margin-right: 120px;">
       <a href="/form-blog"
         style="background-color: orangered; padding: 10px 20px; color: white; text-decoration: none">Add Blog</a>
     </div>
-
+    {{end}}
 
     <div id="contents" class="blog-list">
       <!-- dynamic content would be here -->
@@ -47,12 +60,12 @@
           <img src="/public/images/{{$data.Image}}" alt="" />
         </div>
         <div class="blog-content">
-          <div class="btn-group" style="display:flex;width: 100%; justify-content:flex-end;">
+          {{if $.DataSession.IsLogin}}
+          <div class="btn-group">
             <a href="#" class="btn-edit">Edit Post</a>
-            <form action="/blog-delete/{{$data.ID}}" method="POST" style="margin-left:10px">
-              <input type="submit" class="btn-post" value="Delete Blog" style="cursor:pointer">
-            </form>
+            <a href="/blog-delete/{{$data.ID}}" class="btn-post">Delete Blog</a>
           </div>
+          {{end}}
           <h1>
             <a href="/blog-detail/{{$data.ID}}" target="_blank">{{$data.Title}}</a>
           </h1>
@@ -75,7 +88,6 @@
   </div>
 
   <script>
-
   </script>
 </body>
 

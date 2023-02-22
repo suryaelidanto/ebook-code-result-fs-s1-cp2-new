@@ -42,6 +42,13 @@ type User struct {
 	Password string
 }
 
+type SessionData struct {
+	IsLogin bool
+	Name    string
+}
+
+var userData = SessionData{}
+
 // var dataBlog = []Blog{
 // 	{
 // 		Title:    "Hallo Title",
@@ -92,6 +99,8 @@ func main() {
 	e.GET("/form-login", formLogin)
 	e.POST("/login", login)
 
+	e.POST("/logout", logout)
+
 	// Start server
 	println("Server running on port 5000")
 	e.Logger.Fatal(e.Start("localhost:5000"))
@@ -121,7 +130,7 @@ func contact(c echo.Context) error {
 }
 
 func blog(c echo.Context) error {
-	data, _ := connection.Conn.Query(context.Background(), "SELECT id, title, content, image, post_date FROM tb_blog")
+	data, _ := connection.Conn.Query(context.Background(), "SELECT id, title, content, image, post_date FROM tb_blog ORDER BY id DESC")
 
 	var result []Blog
 	for data.Next() {
@@ -133,14 +142,24 @@ func blog(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 		}
 
-		each.Author = "Surya Elidanto"
 		each.FormatDate = each.PostDate.Format("2 January 2006")
+		each.Author = "Surya Elidanto"
 
 		result = append(result, each)
 	}
 
+	sess, _ := session.Get("session", c)
+
+	if sess.Values["isLogin"] != true {
+		userData.IsLogin = false
+	} else {
+		userData.IsLogin = sess.Values["isLogin"].(bool)
+		userData.Name = sess.Values["name"].(string)
+	}
+
 	blogs := map[string]interface{}{
-		"Blogs": result,
+		"Blogs":       result,
+		"DataSession": userData,
 	}
 
 	return c.Render(http.StatusOK, "blog.html", blogs)
@@ -264,6 +283,14 @@ func login(c echo.Context) error {
 	sess.Values["email"] = user.Email
 	sess.Values["id"] = user.ID
 	sess.Values["isLogin"] = true
+	sess.Save(c.Request(), c.Response())
+
+	return c.Redirect(http.StatusMovedPermanently, "/")
+}
+
+func logout(c echo.Context) error {
+	sess, _ := session.Get("session", c)
+	sess.Options.MaxAge = -1
 	sess.Save(c.Request(), c.Response())
 
 	return c.Redirect(http.StatusMovedPermanently, "/")
