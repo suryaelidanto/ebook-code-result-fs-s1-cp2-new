@@ -33,6 +33,13 @@ type Blog struct {
 	FormatDate string
 }
 
+type User struct {
+	ID       int
+	Name     string
+	Email    string
+	Password string
+}
+
 // var dataBlog = []Blog{
 // 	{
 // 		Title:    "Hallo Title",
@@ -76,6 +83,9 @@ func main() {
 
 	e.GET("/form-register", formRegister)
 	e.POST("/register", register)
+
+	e.GET("/form-login", formLogin)
+	e.POST("/login", login)
 
 	// Start server
 	println("Server running on port 5000")
@@ -194,4 +204,30 @@ func register(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusMovedPermanently, "/form-register")
+}
+
+func formLogin(c echo.Context) error {
+	return c.Render(http.StatusOK, "form-login.html", nil)
+}
+
+func login(c echo.Context) error {
+	err := c.Request().ParseForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+	email := c.FormValue("inputEmail")
+	password := c.FormValue("inputPassword")
+
+	user := User{}
+	err = connection.Conn.QueryRow(context.Background(), "SELECT * FROM tb_user WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Email or password is incorrect!"})
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Email or password is incorrect!"})
+	}
+
+	return c.Redirect(http.StatusMovedPermanently, "/")
 }
