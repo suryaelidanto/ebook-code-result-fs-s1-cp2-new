@@ -193,5 +193,5 @@ func register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "register error, please try again"})
 	}
 
-	return c.Redirect(http.StatusMovedPermanently, "/register")
+	return c.Redirect(http.StatusMovedPermanently, "/form-register")
 }
